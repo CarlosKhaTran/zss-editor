@@ -93,16 +93,17 @@ export default class RichTextToolbar extends Component {
 
   _defaultRenderAction(action, selected) {
     const icon = this._getButtonIcon(action);
+    console.log('xxxx', action, icon)
     return (
       <TouchableOpacity
           key={action}
           style={[
-            {height: 50, width: 50, justifyContent: 'center'},
+            {height: 40, width: 40, marginTop: 5, justifyContent: 'center'},
             selected ? this._getButtonSelectedStyle() : this._getButtonUnselectedStyle()
           ]}
           onPress={() => this._onPress(action)}
       >
-        {icon ? <Image source={icon} style={{tintColor: selected ? this.props.selectedIconTint : this.props.iconTint}}/> : null}
+        {icon ? <Image source={icon} style={[ {height: 20, width: 20, alignSelf: 'center'}, {tintColor: selected ? this.props.selectedIconTint : this.props.iconTint}]}/> : null}
       </TouchableOpacity>
     );
   }
@@ -119,6 +120,7 @@ export default class RichTextToolbar extends Component {
           style={[{height: 50, backgroundColor: '#D3D3D3', alignItems: 'center'}, this.props.style]}
       >
        <FlatList
+          keyExtractor={item => item}
           data={this.state.dataSet}
           numColumns={this.state.actions.length}
           renderItem={(item) => this._renderAction(item.item.action, item.item.selected)}
