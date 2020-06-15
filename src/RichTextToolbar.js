@@ -27,7 +27,6 @@ function getDefaultIcon() {
 export default class RichTextToolbar extends Component {
 
   static propTypes = {
-    getEditor: PropTypes.func.isRequired,
     actions: PropTypes.array,
     onPressAddLink: PropTypes.func,
     onPressAddImage: PropTypes.func,
@@ -55,12 +54,24 @@ export default class RichTextToolbar extends Component {
   }
 
   componentDidMount() {
-    const editor = this.props.getEditor();
+    const {editor} = this.props
     if (!editor) {
       throw new Error('Toolbar has no editor!');
     } else {
       editor.registerToolbar((selectedItems) => this.setSelectedItems(selectedItems));
       this.setState({editor});
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    const {editor} = this.props
+    if (prevProps.editor !== this.props.editor) {
+      if (!editor) {
+        throw new Error('Toolbar has no editor!');
+      } else {
+        editor.registerToolbar((selectedItems) => this.setSelectedItems(selectedItems));
+        this.setState({editor});
+      }
     }
   }
 
@@ -93,7 +104,6 @@ export default class RichTextToolbar extends Component {
 
   _defaultRenderAction(action, selected) {
     const icon = this._getButtonIcon(action);
-    console.log('xxxx', action, icon)
     return (
       <TouchableOpacity
           key={action}

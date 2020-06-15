@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 // import WebViewBridge from 'react-native-webview-bridge-updated';
-import WebView from 'react-native-webview';
+import {WebView} from 'react-native-webview';
 import {MessageConverter} from './WebviewMessageHandler';
 import {actions, messages} from './const';
 import {Modal, View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, PixelRatio, Keyboard, Dimensions} from 'react-native';
@@ -71,13 +71,13 @@ export default class RichTextEditor extends Component {
   }
 
   _onKeyboardWillShow(event) {
-    console.log('!!!!', event);
     const newKeyboardHeight = event.endCoordinates.height;
     if (this.state.keyboardHeight === newKeyboardHeight) {
       return;
     }
     if (newKeyboardHeight) {
       this.setEditorAvailableHeightBasedOnKeyboardHeight(newKeyboardHeight);
+      // this.props.pushUp();
     }
     this.setState({keyboardHeight: newKeyboardHeight});
   }
@@ -99,6 +99,7 @@ export default class RichTextEditor extends Component {
     const { data: str } = nativeEvent;
     try {
       const message = JSON.parse(str);
+      // console.log(message)
       switch (message.type) {
         case 'GET_CONTENT_HEIGHT': {
           this.props.onContentHeight && this.props.onContentHeight(message.data);
@@ -169,7 +170,6 @@ export default class RichTextEditor extends Component {
           this.showLinkDialog(title, url);
           break;
         case messages.LOG:
-          console.log('FROM ZSS', message.data);
           break;
         case messages.SCROLL:
           this.props.onContentHeight && this.props.onContentHeight(message.height);
@@ -300,18 +300,19 @@ export default class RichTextEditor extends Component {
     //in release build, external html files in Android can't be required, so they must be placed in the assets folder and accessed via uri
     const pageSource = PlatformIOS ? require('./editor.html') : { uri: 'file:///android_asset/editor.html' };
     return (
-      <View style={{flex: 1}}>
+      <View style={{flex: 1, backgroundColor: 'red'}}>
         <WebView
           {...this.props}
           hideKeyboardAccessoryView={true}
-          keyboardDisplayRequiresUserAction={false}
+          // keyboardDisplayRequiresUserAction={false}
           ref={(r) => {this.webview = r}}
           onMessage={(message) => this.onMessage(message)}
           // injectedJavaScript={injectScript}
           source={pageSource}
+          scrollEnabled={false}
+          originWhitelist={["*"]}
           onLoad={() => this.init()}
         />
-        {this._renderLinkModal()}
       </View>
     );
   }
@@ -391,7 +392,9 @@ export default class RichTextEditor extends Component {
   }
 
   blurContentEditor() {
+        this.prepareInsert();
     this._sendAction(actions.blurContentEditor);
+    // this.prepareInsert();
   }
 
   setBold() {
@@ -472,7 +475,6 @@ export default class RichTextEditor extends Component {
 
   insertImage(attributes) {
     this._sendAction(actions.insertImage, attributes);
-    this.prepareInsert(); //This must be called BEFORE insertImage. But WebViewBridge uses a stack :/
   }
 
   setSubscript() {
